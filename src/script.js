@@ -43,14 +43,14 @@ function updatePlayerPos(playerCoordinatesIn, cells) {
     cells[playerCoordinates].classList.add("player");
 }
 
-function mouveToDirrection(dirrection, playerCoordinatesIn) {
+function mouveToDirrection(dirrection, playerCoordinatesIn, amount) {
     const dirrectionIndex = {
         "UP":1,
         "DOWN":2,
         "LEFT":3,
         "RIGHT":4
     }
-    //for (let index = 0; index < amount; index++) {
+    for (let index = 0; index < amount; index++) {
         switch (dirrectionIndex[dirrection]) {
             case 1:
                 playerCoordinatesIn["y"]--;
@@ -69,7 +69,7 @@ function mouveToDirrection(dirrection, playerCoordinatesIn) {
                 break;
         }
    
-   // }
+    }
     return playerCoordinatesIn;
 }
 
@@ -84,10 +84,32 @@ function getInputProgramm() {
 }
 
 function parseAndExec(program) {
+    // defining paterns for commands
     const mouvingPatern = /AVANCER (\d+)$/i;
+    const mouvingBackPatern = /reculer (\d+)$/i;
+
+
+    //iterating on each line of code
+
+
     program.forEach(line => {
+
+        //for the current line, verifying if it match any patern
+
         if (mouvingPatern.test(line)){
-            playerCoordinates = mouveToDirrection("UP", playerCoordinates);
+
+            // if it does, updating the position
+            let amount = Number(line.match(mouvingPatern)[1]);
+
+            playerCoordinates = mouveToDirrection("RIGHT", playerCoordinates, amount);
+
+            updatePlayerPos(playerCoordinates, cells)
+
+        } else if (mouvingBackPatern.test(line)) {
+            let amount = Number(line.match(mouvingPatern)[1]);
+
+            playerCoordinates = mouveToDirrection("LEFT", playerCoordinates, amount);
+
             updatePlayerPos(playerCoordinates, cells)
         }
     });
