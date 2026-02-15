@@ -44,14 +44,9 @@ function updatePlayerPos(playerCoordinatesIn, cells) {
 }
 
 function mouveToDirrection(dirrection, playerCoordinatesIn, amount) {
-    const dirrectionIndex = {
-        "UP":1,
-        "DOWN":2,
-        "LEFT":3,
-        "RIGHT":4
-    }
+    
     for (let index = 0; index < amount; index++) {
-        switch (dirrectionIndex[dirrection]) {
+        switch (dirrection) {
             case 1:
                 playerCoordinatesIn["y"]--;
                 break;
@@ -88,11 +83,10 @@ function parseAndExec(program) {
     const mouvingPatern = /AVANCER (\d+)$/i;
     const mouvingBackPatern = /reculer (\d+)$/i;
 
-
     //iterating on each line of code
-    let i = 1
     program.forEach(line => { 
-
+        // defining the direction 
+        let direction = 4;
         //for the current line, verifying if it match any patern
         let matchAvancer = line.match(mouvingPatern);
         let matchReculer = line.match(mouvingBackPatern);
@@ -103,15 +97,17 @@ function parseAndExec(program) {
 
             // if it does, updating the position
             let amount = Number(matchAvancer[1]);
-
-            playerCoordinates = mouveToDirrection("RIGHT", playerCoordinates, amount);
+            console.log((dirrection%5)+1);
+            
+            playerCoordinates = mouveToDirrection((direction%5)+1, playerCoordinates, amount);
 
             updatePlayerPos(playerCoordinates, cells)
 
         } else if (matchReculer) {
             let amount = Number(matchReculer[1]);
+            console.log(((dirrection+2)%5)+1);
 
-            playerCoordinates = mouveToDirrection("LEFT", playerCoordinates, amount);
+            playerCoordinates = mouveToDirrection(((direction)+2%5)+1, playerCoordinates, amount);
 
             updatePlayerPos(playerCoordinates, cells)
         } else {
@@ -122,3 +118,9 @@ function parseAndExec(program) {
 
 
 
+//const dirrectionIndex = {
+//        "UP":1,
+//        "DOWN":2,
+//        "LEFT":3,
+//        "RIGHT":4
+//    }
