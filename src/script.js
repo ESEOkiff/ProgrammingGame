@@ -5,70 +5,79 @@ const HEIGHT = 10;
 
 
 // position du joueur
-let playerCoordinates = {
-    "x" : 1,
-    "y" : 8
+let playerCoordinatesAndDirection = {
+    "x": 1,
+    "y": 8,
+    "direction": 4
 };
 
 
 for (let y = 0; y < HEIGHT; y++) {
-  for (let x = 0; x < WIDTH; x++) {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    let index = y * WIDTH + x;
+    for (let x = 0; x < WIDTH; x++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        let index = y * WIDTH + x;
 
-    if (x === playerCoordinates["x"] && y === playerCoordinates["y"]) {
-      cell.classList.add("player");
+        if (x === playerCoordinatesAndDirection["x"] && y === playerCoordinatesAndDirection["y"]) {
+            cell.classList.add("player");
+        }
+
+        grid.appendChild(cell);
     }
-
-    grid.appendChild(cell);
-  }
 }
+
+
 const cells = grid.children;
 
-document.getElementById("run").addEventListener('click', (event)=>{
+document.getElementById("run").addEventListener('click', (event) => {
     event.preventDefault();
-    parseAndExec(getInputProgramm());
+    let program = parse(getInputProgramm());
+
+    execute(program, playerCoordinatesAndDirection);
 });
 
 function updatePlayerPos(playerCoordinatesIn, cells) {
-    if (playerCoordinatesIn["y"]>=HEIGHT  || playerCoordinatesIn["x"]>=WIDTH ||playerCoordinatesIn["y"]<0 || playerCoordinatesIn["x"]< 0 ) {
+    if (playerCoordinatesIn["y"] >= HEIGHT || playerCoordinatesIn["x"] >= WIDTH || playerCoordinatesIn["y"] < 0 || playerCoordinatesIn["x"] < 0) {
         alert("too far away")
         return;
     }
     if (document.querySelector(".player") != null) {
         document.querySelector(".player").classList.remove("player");
     }
-    let playerCoordinates = playerCoordinatesIn["y"]*WIDTH+playerCoordinatesIn["x"];
-    cells[playerCoordinates].classList.add("player");
+    let playerCoordinatesAndDirection = playerCoordinatesIn["y"] * WIDTH + playerCoordinatesIn["x"];
+    cells[playerCoordinatesAndDirection].classList.add("player");
 }
-
-function mouveToDirrection(dirrection, playerCoordinatesIn, amount) {
-    
-    for (let index = 0; index < amount; index++) {
-        switch (dirrection) {
+function mouveToDirrection(direction, playerCoordinatesIn, amount) {
+    if (amount < 0) {
+        direction = -direction;
+        amount = -amount
+    }
+    for (let index = 0; index < amount; index++) {      
+        switch (direction) {
             case 1:
+            case -3:
                 playerCoordinatesIn["y"]--;
                 break;
-            case 2:
+            case 3:
+            case -1:
                 playerCoordinatesIn["y"]++;
                 break;
-            case 3:
+            case 2:
+            case -4:
                 playerCoordinatesIn["x"]--;
                 break;
             case 4:
+            case -2:
                 playerCoordinatesIn["x"]++;
                 break;
-    
+
             default:
                 break;
         }
-   
+
     }
     return playerCoordinatesIn;
 }
-
-
 function getInputProgramm() {
     let program = document.getElementById("commands").value;
 
@@ -77,50 +86,75 @@ function getInputProgramm() {
         .map(line => line.trim())
         .filter(line => line !== "");
 }
-
-function parseAndExec(program) {
+function parse(program) {
     // defining paterns for commands
-    const mouvingPatern = /AVANCER (\d+)$/i;
-    const mouvingBackPatern = /reculer (\d+)$/i;
+    const movingPattern = /^\s*avancer\s+(\d+)\s*$/i;
+    const movingBackPattern = /^\s*reculer\s+(\d+)\s*$/i;
+    const turnPatern = /^\s*tourner\s+(droite|gauche)\s*$/i;
+    let programOut = [];
 
     //iterating on each line of code
-    program.forEach(line => { 
-        // defining the direction 
-        let direction = 4;
+
+    program.forEach(line => {
+
         //for the current line, verifying if it match any patern
-        let matchAvancer = line.match(mouvingPatern);
-        let matchReculer = line.match(mouvingBackPatern);
-        if (line.startsWith('//')){
+        let matchAvancer = line.match(movingPattern);
+        let matchReculer = line.match(movingBackPattern);
+        let matchTourner = line.match(turnPatern);
+
+
+        if (line.startsWith('//')) {
+
             console.log("comment");
-            
-        } else if (matchAvancer){
 
-            // if it does, updating the position
-            let amount = Number(matchAvancer[1]);
-            console.log((dirrection%5)+1);
-            
-            playerCoordinates = mouveToDirrection((direction%5)+1, playerCoordinates, amount);
+        } else if (matchAvancer) {
 
-            updatePlayerPos(playerCoordinates, cells)
+            let _amount = Number(matchAvancer[1]);
+
+            programOut.push({ type: "MOVE", amount: _amount });
 
         } else if (matchReculer) {
-            let amount = Number(matchReculer[1]);
-            console.log(((dirrection+2)%5)+1);
 
-            playerCoordinates = mouveToDirrection(((direction)+2%5)+1, playerCoordinates, amount);
+            let _amount = Number(matchReculer[1]);
 
-            updatePlayerPos(playerCoordinates, cells)
+            programOut.push({ type: "MOVE", amount: -_amount });
+
+        } else if (matchTourner){
+
+            let _direction = matchTourner[1].toUpperCase();
+
+            programOut.push({ type: "TURN", direction: _direction });
+
         } else {
-            alert("unknown command : "+line);
+            alert("unknown command : " + line);
+        }
+    });
+    return programOut;
+}
+//const dirrectionIndex = {
+//        "UP":1,
+//        "LEFT":2,
+//        "DOWN":3,
+//        "RIGHT":4
+//}
+function execute(program, playerCoordinatesAndDirection) {
+    playerCoordinatesAndDirection = {
+        "x": 1,
+        "y": 8,
+        "direction": 4
+    };
+    updatePlayerPos(playerCoordinatesAndDirection, cells);
+    program.forEach(line => {
+        if (line.type == "MOVE") {
+
+            playerCoordinatesAndDirection = mouveToDirrection(playerCoordinatesAndDirection["direction"], playerCoordinatesAndDirection, line.amount);
+            updatePlayerPos(playerCoordinatesAndDirection, cells);
+
+        } else if (line.type == "TURN") {
+            if (line.direction === "DROITE") playerCoordinatesAndDirection["direction"] = playerCoordinatesAndDirection["direction"] - 1;
+            if (line.direction === "GAUCHE") playerCoordinatesAndDirection["direction"] = playerCoordinatesAndDirection["direction"] + 1;
+            if (playerCoordinatesAndDirection["direction"] <-4) playerCoordinatesAndDirection["direction"] = -1;
+            if (playerCoordinatesAndDirection["direction"] > 4) playerCoordinatesAndDirection["direction"] = 1;
         }
     });
 }
-
-
-
-//const dirrectionIndex = {
-//        "UP":1,
-//        "DOWN":2,
-//        "LEFT":3,
-//        "RIGHT":4
-//    }
