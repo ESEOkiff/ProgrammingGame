@@ -90,44 +90,80 @@ function parse(program) {
     const movingPattern = /^\s*avancer\s+(\d+)\s*$/i;
     const movingBackPattern = /^\s*reculer\s+(\d+)\s*$/i;
     const turnPatern = /^\s*tourner\s+(droite|gauche)\s*$/i;
+    const loopPatern = /^\s*boucler\s+(\d+)\s*fois\s*$/i;
+    const endPatern = /^\s*fin\s*$/i;
     let programOut = [];
 
     //iterating on each line of code
 
-    program.forEach(line => {
-
+    for (let i = 0; i < program.length; i++) {
+        let line = program[i];
         //for the current line, verifying if it match any patern
         let matchAvancer = line.match(movingPattern);
         let matchReculer = line.match(movingBackPattern);
         let matchTourner = line.match(turnPatern);
-
-
+        let matchBoucler = line.match(loopPatern);
+        let matchFIN = line.match(endPatern);
+        
         if (line.startsWith('//')) {
-
+            
             console.log("comment");
-
+            
         } else if (matchAvancer) {
-
+            
             let _amount = Number(matchAvancer[1]);
-
+            
             programOut.push({ type: "MOVE", amount: _amount });
-
+            
         } else if (matchReculer) {
-
+            
             let _amount = Number(matchReculer[1]);
-
+            
             programOut.push({ type: "MOVE", amount: -_amount });
-
+            
         } else if (matchTourner){
-
+            
             let _direction = matchTourner[1].toUpperCase();
-
+            
             programOut.push({ type: "TURN", direction: _direction });
-
+            
+        } else if(matchBoucler) {
+            i++;
+            let depth = 1;
+            let underBlock = [];
+            let END = false;
+            while (depth!==0) {
+                let Line = program[i];
+                if (!Line) {
+                    alert("fin manquant pour une boucle");
+                    break;
+                }
+                if (Line.match(loopPatern)) {
+                    depth++;
+                } else if (Line.match(endPatern)){
+                    depth--
+                }
+                if (depth>0) {
+                    underBlock.push(Line);
+                } 
+                i++
+            }
+            let block = parse(underBlock);
+            for (let m = 0; m < Number(matchBoucler[1]); m++) {
+                block.forEach(element => {
+                    programOut.push(element);
+                });
+            }
+            console.log(programOut);
+            
+            
         } else {
             alert("unknown command : " + line);
         }
-    });
+
+    };
+    console.log(programOut);
+    
     return programOut;
 }
 //const dirrectionIndex = {
