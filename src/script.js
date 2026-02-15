@@ -90,28 +90,32 @@ function parseAndExec(program) {
 
 
     //iterating on each line of code
-
+    let i = 1
     program.forEach(line => { 
 
         //for the current line, verifying if it match any patern
+        let matchAvancer = line.match(mouvingPatern);
+        let matchReculer = line.match(mouvingBackPatern);
         if (line.startsWith('//')){
             console.log("comment");
             
-        } else if (mouvingPatern.test(line)){
+        } else if (matchAvancer){
 
             // if it does, updating the position
-            let amount = Number(line.match(mouvingPatern)[1]);
+            let amount = Number(matchAvancer[1]);
 
             playerCoordinates = mouveToDirrection("RIGHT", playerCoordinates, amount);
 
             updatePlayerPos(playerCoordinates, cells)
 
-        } else if (mouvingBackPatern.test(line)) {
-            let amount = Number(line.match(mouvingBackPatern)[1]);
+        } else if (matchReculer) {
+            let amount = Number(matchReculer[1]);
 
             playerCoordinates = mouveToDirrection("LEFT", playerCoordinates, amount);
 
             updatePlayerPos(playerCoordinates, cells)
+        } else {
+            alert("unknown command : "+line);
         }
     });
 }
