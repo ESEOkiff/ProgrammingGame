@@ -106,7 +106,7 @@ function parseAndExec(program) {
             updatePlayerPos(playerCoordinates, cells)
 
         } else if (mouvingBackPatern.test(line)) {
-            let amount = Number(line.match(mouvingPatern)[1]);
+            let amount = Number(line.match(mouvingBackPatern)[1]);
 
             playerCoordinates = mouveToDirrection("LEFT", playerCoordinates, amount);
 
