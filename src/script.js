@@ -24,7 +24,7 @@ for (let y = 0; y < HEIGHT; y++) {
     grid.appendChild(cell);
   }
 }
-let cells = grid;
+const cells = grid.children;
 
 document.getElementById("run").addEventListener('click', (event)=>{
     event.preventDefault();
@@ -91,12 +91,13 @@ function parseAndExec(program) {
 
     //iterating on each line of code
 
-
-    program.forEach(line => {
+    program.forEach(line => { 
 
         //for the current line, verifying if it match any patern
-
-        if (mouvingPatern.test(line)){
+        if (line.startsWith('//')){
+            console.log("comment");
+            
+        } else if (mouvingPatern.test(line)){
 
             // if it does, updating the position
             let amount = Number(line.match(mouvingPatern)[1]);
@@ -114,7 +115,6 @@ function parseAndExec(program) {
         }
     });
 }
-cells = grid.children;
 
 
 
