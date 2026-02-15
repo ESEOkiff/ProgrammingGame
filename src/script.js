@@ -11,7 +11,6 @@ let playerCoordinatesAndDirection = {
     "direction": 4
 };
 
-
 for (let y = 0; y < HEIGHT; y++) {
     for (let x = 0; x < WIDTH; x++) {
         const cell = document.createElement("div");
