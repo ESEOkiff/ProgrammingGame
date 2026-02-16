@@ -3,6 +3,9 @@ const grid = document.getElementById("grid");
 const WIDTH = 10;
 const HEIGHT = 10;
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // position du joueur
 let playerCoordinatesAndDirection = {
@@ -92,6 +95,7 @@ function parse(program) {
     const turnPatern = /^\s*tourner\s+(droite|gauche)\s*$/i;
     const loopPatern = /^\s*boucler\s+(\d+)\s*fois\s*$/i;
     const endPatern = /^\s*fin\s*$/i;
+    const waitPattern = /^\s*attendre\s+(\d+)\s*$/i;
     let programOut = [];
 
     //iterating on each line of code
@@ -104,6 +108,8 @@ function parse(program) {
         let matchTourner = line.match(turnPatern);
         let matchBoucler = line.match(loopPatern);
         let matchFIN = line.match(endPatern);
+        let matchAttendre = line.match(waitPattern);
+
         
         if (line.startsWith('//')) {
             
@@ -154,16 +160,21 @@ function parse(program) {
                     programOut.push(element);
                 });
             }
+            i--;
+            console.log("boucle parsée : ");
             console.log(programOut);
             
-            
+        } else if (matchAttendre) {
+            programOut.push({ type: "WAIT", duration: Number(matchAttendre[1]) });
         } else {
             alert("unknown command : " + line);
         }
 
     };
-    console.log(programOut);
     
+    
+    console.log("programme final : ");
+    console.log(programOut);
     return programOut;
 }
 //const dirrectionIndex = {
@@ -172,14 +183,16 @@ function parse(program) {
 //        "DOWN":3,
 //        "RIGHT":4
 //}
-function execute(program, playerCoordinatesAndDirection) {
+async function execute(program, playerCoordinatesAndDirection) {
+    
     playerCoordinatesAndDirection = {
         "x": 1,
         "y": 8,
         "direction": 4
     };
     updatePlayerPos(playerCoordinatesAndDirection, cells);
-    program.forEach(line => {
+    for (const line of program) {
+        await sleep(500);
         if (line.type == "MOVE") {
 
             playerCoordinatesAndDirection = mouveToDirrection(playerCoordinatesAndDirection["direction"], playerCoordinatesAndDirection, line.amount);
@@ -190,6 +203,9 @@ function execute(program, playerCoordinatesAndDirection) {
             if (line.direction === "GAUCHE") playerCoordinatesAndDirection["direction"] = playerCoordinatesAndDirection["direction"] + 1;
             if (playerCoordinatesAndDirection["direction"] <-4) playerCoordinatesAndDirection["direction"] = -1;
             if (playerCoordinatesAndDirection["direction"] > 4) playerCoordinatesAndDirection["direction"] = 1;
+        } else if (line.type === "WAIT") {
+            await sleep(line.duration * 1000);
         }
-    });
+
+    }
 }

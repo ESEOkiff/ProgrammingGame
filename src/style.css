@@ -24,6 +24,7 @@ body {
 
 .player {
     background: limegreen;
+    scale: 1.05;
 }
 
 textarea {
