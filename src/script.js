@@ -3,6 +3,7 @@ const grid = document.getElementById("grid");
 const WIDTH = 10;
 const HEIGHT = 10;
 
+const directionText = document.getElementById('dirText');
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -203,6 +204,13 @@ async function execute(program, playerCoordinatesAndDirection) {
             if (line.direction === "GAUCHE") playerCoordinatesAndDirection["direction"] = playerCoordinatesAndDirection["direction"] + 1;
             if (playerCoordinatesAndDirection["direction"] <-4) playerCoordinatesAndDirection["direction"] = -1;
             if (playerCoordinatesAndDirection["direction"] > 4) playerCoordinatesAndDirection["direction"] = 1;
+            const dirrectionIndex = {
+                1:"HAUT",
+                2:"GAUCHE",
+                3:"BAS",
+                4:"DROITE"
+            }
+            directionText.innerHTML = "dirrection : "+dirrectionIndex[playerCoordinatesAndDirection["direction"]].toLowerCase();
         } else if (line.type === "WAIT") {
             await sleep(line.duration * 1000);
         }
